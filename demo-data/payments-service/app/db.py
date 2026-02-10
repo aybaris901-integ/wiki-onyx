@@ -29,3 +29,11 @@ merchant_endpoints = Table(
     Column("merchant_id", String, primary_key=True),
     Column("url", String, nullable=False),
 )
+
+# PayRail delivers each event at least once, so we remember the ids we've processed.
+payrail_events = Table(
+    "payrail_events",
+    metadata,
+    Column("id", String, primary_key=True),
+    Column("received_at", BigInteger, nullable=False),
+)
