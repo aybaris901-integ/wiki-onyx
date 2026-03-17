@@ -57,7 +57,7 @@ def create_app(engine, gateway, webhook_secret: str) -> FastAPI:
             raise HTTPException(401, "bad signature")
         merchant_event = handle_event(engine, json.loads(body), now)
         if merchant_event:
-            notify(engine, merchant_event)
+            notify(engine, merchant_event, now)
 
     return app
 

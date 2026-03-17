@@ -26,6 +26,6 @@ def reconcile_stuck_payments(engine, gateway, now: int) -> int:
         with engine.begin() as conn:
             event = apply_status(conn, payment_id, status, now)
         if event:
-            notify(engine, event)
+            notify(engine, event, now)
             changed += 1
     return changed

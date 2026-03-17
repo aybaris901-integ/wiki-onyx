@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, Integer, MetaData, String, Table
+from sqlalchemy import BigInteger, Column, Index, Integer, MetaData, String, Table, Text
 
 metadata = MetaData()
 
@@ -37,3 +37,16 @@ payrail_events = Table(
     Column("id", String, primary_key=True),
     Column("received_at", BigInteger, nullable=False),
 )
+
+webhook_deliveries = Table(
+    "webhook_deliveries",
+    metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("merchant_id", String, nullable=False),
+    Column("url", String, nullable=False),
+    Column("payload", Text, nullable=False),
+    Column("attempts", Integer, nullable=False, default=0),
+    Column("next_attempt_at", BigInteger, nullable=False),
+    Column("status", String, nullable=False, default="queued"),  # queued | delivered | dead
+)
+Index("ix_webhook_deliveries_due", webhook_deliveries.c.status, webhook_deliveries.c.next_attempt_at)
