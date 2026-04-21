@@ -1,13 +1,15 @@
 import json
 import time
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import create_engine, select
 
 from . import config
-from .charges import InvoiceAlreadyPaid, InvoiceNotFound, pay_invoice
+from .charges import InvoiceNotFound, pay_invoice
 from .db import payments
+from .idempotency import KeyInProgress, KeyReused
 from .merchant_webhooks import notify
 from .payrail import GatewayTimeout, PayRailClient
 from .payrail_webhooks import BadSignature, handle_event, verify_signature
@@ -21,15 +23,27 @@ def create_app(engine, gateway, webhook_secret: str) -> FastAPI:
     app = FastAPI(title="payments-service")
 
     @app.post("/invoices/{invoice_id}/pay")
-    def pay(invoice_id: str, request: PayRequest):
+    def pay(
+        invoice_id: str,
+        request: PayRequest,
+        x_merchant_id: str = Header(),
+        idempotency_key: str = Header(default=""),
+    ):
+        if not idempotency_key:
+            raise HTTPException(400, "Idempotency-Key header is required")
         try:
-            return pay_invoice(engine, gateway, invoice_id, request.method, int(time.time()))
+            code, body = pay_invoice(
+                engine, gateway, invoice_id, request.method, x_merchant_id, idempotency_key, int(time.time())
+            )
         except InvoiceNotFound:
             raise HTTPException(404, "invoice not found")
-        except InvoiceAlreadyPaid:
-            raise HTTPException(409, "invoice already paid")
+        except KeyInProgress:
+            raise HTTPException(409, "a request with this key is in progress or its outcome is unknown")
+        except KeyReused:
+            raise HTTPException(422, "this key was already used for a different request")
         except GatewayTimeout:
             raise HTTPException(504, "payment gateway timed out")
+        return JSONResponse(body, status_code=code)
 
     @app.get("/invoices/{invoice_id}/payment-status")
     def payment_status(invoice_id: str):

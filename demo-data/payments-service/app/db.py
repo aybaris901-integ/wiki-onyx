@@ -50,3 +50,15 @@ webhook_deliveries = Table(
     Column("status", String, nullable=False, default="queued"),  # queued | delivered | dead
 )
 Index("ix_webhook_deliveries_due", webhook_deliveries.c.status, webhook_deliveries.c.next_attempt_at)
+
+idempotency_keys = Table(
+    "idempotency_keys",
+    metadata,
+    Column("merchant_id", String, primary_key=True),
+    Column("key", String, primary_key=True),
+    Column("request_hash", String, nullable=False),
+    Column("status", String, nullable=False),  # in_progress | completed
+    Column("response_code", Integer),
+    Column("response_body", Text),
+    Column("created_at", BigInteger, nullable=False),
+)
