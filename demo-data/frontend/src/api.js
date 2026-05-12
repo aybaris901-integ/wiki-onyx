@@ -9,8 +9,12 @@ export function createApi({ fetch, getToken }) {
   }
 
   return {
-    payInvoice: (invoiceId) =>
-      request(`/api/invoices/${invoiceId}/pay`, { method: "POST", body: JSON.stringify({ method: "card" }) }),
+    payInvoice: (invoiceId, idempotencyKey) =>
+      request(`/api/invoices/${invoiceId}/pay`, {
+        method: "POST",
+        headers: { "idempotency-key": idempotencyKey },
+        body: JSON.stringify({ method: "card" }),
+      }),
     paymentStatus: (invoiceId) => request(`/api/invoices/${invoiceId}/payment-status`),
   };
 }
