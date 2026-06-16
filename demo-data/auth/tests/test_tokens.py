@@ -11,6 +11,10 @@ def test_round_trip():
     assert claims["sub"] == "u_1" and claims["sid"] == "s_1"
 
 
+def test_lifetime_is_15_minutes():
+    assert ACCESS_TOKEN_TTL_SECONDS == 15 * 60
+
+
 def test_expires():
     token = issue_access_token(SECRET, "u_1", "s_1", now=1000)
     with pytest.raises(InvalidToken):
