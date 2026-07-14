@@ -1,11 +1,9 @@
-import logging
+import time
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from .mailer import build_receipt, send_smtp
-
-log = logging.getLogger("notifications")
+from .outbox import enqueue
 
 
 class ReceiptRequest(BaseModel):
@@ -16,15 +14,13 @@ class ReceiptRequest(BaseModel):
     currency: str
 
 
-def create_app(send=send_smtp) -> FastAPI:
+def create_app(engine) -> FastAPI:
     app = FastAPI(title="notifications")
 
     @app.post("/internal/receipts", status_code=202)
     def receipt(request: ReceiptRequest):
-        try:
-            send(build_receipt(request.to, request.invoice_id, request.amount_cents, request.currency))
-        except OSError:
-            log.exception("could not send receipt for %s", request.payment_id)
+        payload = request.model_dump(exclude={"payment_id"})
+        enqueue(engine, request.payment_id, payload, int(time.time()))
         return {"accepted": True}
 
     return app
