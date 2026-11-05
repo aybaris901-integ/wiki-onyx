@@ -2,10 +2,11 @@
 import hashlib
 import hmac
 
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 from sqlalchemy.exc import IntegrityError
 
-from .db import payrail_events
+from . import ach_guard
+from .db import payments, payrail_events
 from .status import apply_status
 
 SIGNATURE_TOLERANCE_SECONDS = 300
@@ -37,6 +38,20 @@ def handle_event(engine, event: dict, now: int) -> dict | None:
     try:
         with engine.begin() as conn:
             conn.execute(insert(payrail_events).values(id=event["id"], received_at=now))
+            if _is_stale_card_failure(conn, event, status):
+                return None
+            if ach_guard.should_hold(conn, event["payment_id"], status, now):
+                ach_guard.hold(conn, event["payment_id"], now)
+                return None
             return apply_status(conn, event["payment_id"], status, now)
     except IntegrityError:
         return None  # already processed this event id
+
+
+def _is_stale_card_failure(conn, event: dict, status: str) -> bool:
+    """A card can't fail after succeeding (refunds and chargebacks are separate events), so this
+    is an earlier attempt's failure arriving late. Only ACH can really fail after success."""
+    if status != "failed":
+        return False
+    row = conn.execute(select(payments).where(payments.c.id == event["payment_id"])).mappings().first()
+    return row is not None and row["method"] == "card" and row["status"] == "succeeded"

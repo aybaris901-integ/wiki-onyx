@@ -62,3 +62,11 @@ idempotency_keys = Table(
     Column("response_body", Text),
     Column("created_at", BigInteger, nullable=False),
 )
+
+held_ach_failures = Table(
+    "held_ach_failures",
+    metadata,
+    Column("payment_id", String, primary_key=True),
+    Column("release_at", BigInteger, nullable=False),
+    Column("status", String, nullable=False),  # held | applied | discarded
+)
