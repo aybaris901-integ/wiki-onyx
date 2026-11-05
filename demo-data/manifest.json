@@ -1,0 +1,28 @@
+{
+  "company": "Acme",
+  "repo": "aybaris901-integ/wiki-onyx",
+  "branch": "company-brain",
+  "people": {
+    "Maya Okafor":   { "handle": "maya",   "role": "Senior Backend Engineer", "team": "Payments",        "status": "active" },
+    "Tomas Ruiz":    { "handle": "tomas",  "role": "Staff Engineer",          "team": "Checkout",        "status": "left",   "left": "2026-03-01" },
+    "Priya Raman":   { "handle": "priya",  "role": "Backend Engineer",        "team": "Checkout",        "status": "active" },
+    "Dana Whitlock": { "handle": "dana",   "role": "Infra Lead",              "team": "Platform",        "status": "active" },
+    "Alex Chen":     { "handle": "alex",   "role": "Senior Engineer",         "team": "Images & Search", "status": "active" },
+    "Jordan Lee":    { "handle": "jordan", "role": "Engineering Manager",     "team": "Engineering",     "status": "active" },
+    "Sam Patel":     { "handle": "sam",    "role": "Backend Engineer",        "team": "Backend",         "status": "new",    "started": "2026-11-02" }
+  },
+  "prs": {
+    "retry-queue":          { "number": null, "url": null, "title": "Move charges into a retry queue",                              "author": "Maya Okafor",   "date": "2025-11-19", "files": ["demo-data/acme/services/payments/retry_queue.py", "demo-data/acme/services/payments/charge.py", "demo-data/acme/services/checkout/order.py"] },
+    "feature-flags-json":   { "number": null, "url": null, "title": "Feature flags as a JSON file in the repo",                     "author": "Tomas Ruiz",    "date": "2025-02-12", "files": ["demo-data/acme/config/feature_flags.json"] },
+    "self-hosted-images":   { "number": null, "url": null, "title": "Keep the self-hosted image server, add hosted CDN kill switch", "author": "Dana Whitlock", "date": "2024-06-24", "files": ["demo-data/acme/services/images/server.py", "demo-data/acme/config/feature_flags.json"] },
+    "postgres-search":      { "number": null, "url": null, "title": "Product search on Postgres full text",                         "author": "Alex Chen",     "date": "2025-04-11", "files": ["demo-data/acme/services/search/indexer.py", "demo-data/acme/services/search/query.py"] },
+    "checkout-codeowners":  { "number": null, "url": null, "title": "CODEOWNERS: Priya owns checkout and payments",                 "author": "Priya Raman",   "date": "2026-03-02", "files": ["demo-data/acme/CODEOWNERS"] },
+    "thumbnail-cron-fix":   { "number": null, "url": null, "title": "Make thumbnail cron idempotent",                               "author": "Alex Chen",     "date": "2026-08-12", "files": ["demo-data/acme/services/images/thumbnail_cron.py"] },
+    "bump-image-cache-ttl": { "number": null, "url": null, "title": "Bump image cache TTL",                                         "author": "Alex Chen",     "date": "2026-10-30", "files": ["demo-data/acme/services/images/server.py"], "has_why": false }
+  },
+  "issues": {
+    "double-charge-incident": { "number": null, "url": null, "title": "Customers double charged during the November sale",            "author": "Tomas Ruiz",    "date": "2025-11-17" },
+    "image-cost-review":      { "number": null, "url": null, "title": "Decide: hosted image CDN or keep our image server",            "author": "Dana Whitlock", "date": "2024-06-18" },
+    "thumbnail-cron-outage":  { "number": null, "url": null, "title": "Thumbnails missing on a third of the storefront (2026-08-12)", "author": "Alex Chen",     "date": "2026-08-12" }
+  }
+}

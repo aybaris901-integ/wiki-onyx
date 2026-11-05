@@ -10,19 +10,28 @@ export type Source = {
   quote?: string;
 };
 
+export type AnswerMeta = {
+  retriever?: string;
+  model?: string;
+  ms?: number;
+  live?: boolean;
+};
+
 export type Answer = {
   answer: string;
   sources: Source[];
   sample?: boolean;
+  saved?: boolean;
+  meta?: AnswerMeta;
 };
 
 export const MAX_QUESTION = 500;
 
 // Swap these for the real demo questions once the made-up company is ready.
 export const EXAMPLE_QUESTIONS = [
-  "Why do payments go through a queue?",
-  "Who owns the checkout service now?",
-  "Why do we still run our own image server?",
+  "Why do payments go through a retry queue?",
+  "Who owns the image server now?",
+  "Why don't we use Elasticsearch for search?",
 ];
 
 function text(value: unknown): string {
@@ -42,7 +51,7 @@ function webLink(value: unknown): string {
 // Returns null when the agent's reply doesn't match the contract.
 export function readAnswer(data: unknown): Answer | null {
   if (!data || typeof data !== "object") return null;
-  const reply = data as { answer?: unknown; sources?: unknown };
+  const reply = data as { answer?: unknown; sources?: unknown; meta?: unknown };
   const answer = text(reply.answer);
   if (!answer) return null;
 
@@ -57,5 +66,17 @@ export function readAnswer(data: unknown): Answer | null {
       quote: text(item.quote) || undefined,
     }));
 
-  return { answer, sources };
+  return { answer, sources, meta: readMeta(reply.meta) };
+}
+
+function readMeta(value: unknown): AnswerMeta | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  const meta: AnswerMeta = {
+    retriever: text(raw.retriever) || undefined,
+    model: text(raw.model) || undefined,
+    ms: typeof raw.ms === "number" && Number.isFinite(raw.ms) ? raw.ms : undefined,
+    live: raw.live === true ? true : undefined,
+  };
+  return Object.values(meta).some((entry) => entry !== undefined) ? meta : undefined;
 }

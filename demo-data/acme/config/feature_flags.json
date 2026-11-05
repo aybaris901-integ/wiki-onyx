@@ -1,0 +1,10 @@
+{
+  "_comment": "Feature flags live here, not in LaunchDarkly. See docs/adr/0002-feature-flags-in-repo.md. Change a flag by opening a PR; the deploy picks it up. Owner: @jordan.",
+  "flags": {
+    "checkout.express_pay": { "enabled": true, "since": "2025-03-04", "owner": "priya", "why": "Apple Pay / Google Pay on the cart page. Shipped after the Feb 2025 flag decision." },
+    "payments.retry_queue": { "enabled": true, "since": "2025-11-19", "owner": "maya", "why": "All charges go through the retry queue. Turning this off re-enables inline retries, which double charged 212 orders. Do not turn this off." },
+    "images.hosted_cdn": { "enabled": false, "since": "2024-06-24", "owner": "dana", "why": "Kept as a kill switch to flip to a hosted CDN if our image server falls over. Revisit when traffic doubles (ADR 0003)." },
+    "search.elastic_backend": { "enabled": false, "since": "2025-04-10", "owner": "alex", "why": "Elasticsearch adapter never shipped. Postgres full text is the only backend (ADR 0005)." },
+    "images.thumbnail_cron_v2": { "enabled": true, "since": "2026-08-13", "owner": "alex", "why": "Idempotent thumbnail cron after the Aug 2026 outage." }
+  }
+}
