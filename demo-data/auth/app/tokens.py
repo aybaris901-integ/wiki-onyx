@@ -1,7 +1,12 @@
-"""Short signed access tokens. The `sid` claim ties a token to a server-side session."""
+"""Short signed access tokens. The `sid` claim ties a token to a server-side session.
+
+15 minutes, down from 60, after the Q2 2026 security review (finding F-03). A stolen token can't
+be recalled, so its lifetime is the most damage it can do. The web app refreshes silently through
+POST /refresh, so people don't notice the shorter lifetime.
+"""
 import jwt
 
-ACCESS_TOKEN_TTL_SECONDS = 60 * 60
+ACCESS_TOKEN_TTL_SECONDS = 15 * 60
 ALGORITHM = "HS256"
 
 
