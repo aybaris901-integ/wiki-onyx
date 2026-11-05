@@ -7,7 +7,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from app.charges import pay_invoice
 from app.db import invoices, payments
 from app.main import create_app
 from app.payrail_webhooks import BadSignature, handle_event, verify_signature
@@ -33,9 +32,9 @@ def test_old_timestamp_fails():
         verify_signature(SECRET, "1000", b"{}", sign("1000", b"{}"), now=2000)
 
 
-def test_event_updates_payment_and_invoice(engine, gateway):
-    payment = pay_invoice(engine, gateway, "inv_1", "card", now=100)
-    event = {"id": "evt_1", "type": "payment.succeeded", "payment_id": payment["payment_id"]}
+def test_event_updates_payment_and_invoice(engine, pay):
+    _, body = pay()
+    event = {"id": "evt_1", "type": "payment.succeeded", "payment_id": body["payment_id"]}
 
     assert handle_event(engine, event, now=110)["status"] == "succeeded"
 
@@ -44,9 +43,9 @@ def test_event_updates_payment_and_invoice(engine, gateway):
         assert conn.execute(select(invoices.c.status)).scalar_one() == "paid"
 
 
-def test_redelivered_event_is_ignored(engine, gateway):
-    payment = pay_invoice(engine, gateway, "inv_1", "card", now=100)
-    event = {"id": "evt_1", "type": "payment.succeeded", "payment_id": payment["payment_id"]}
+def test_redelivered_event_is_ignored(engine, pay):
+    _, body = pay()
+    event = {"id": "evt_1", "type": "payment.succeeded", "payment_id": body["payment_id"]}
     assert handle_event(engine, event, now=110) is not None
     assert handle_event(engine, event, now=111) is None
 
@@ -61,8 +60,8 @@ def test_route_rejects_bad_signature(engine, gateway):
     assert response.status_code == 401
 
 
-def test_route_applies_signed_event(engine, gateway):
-    payment = pay_invoice(engine, gateway, "inv_1", "card", now=100)
+def test_route_applies_signed_event(engine, gateway, pay):
+    _, payment = pay()
     body = json.dumps({"id": "evt_1", "type": "payment.failed", "payment_id": payment["payment_id"]}).encode()
     timestamp = str(int(time.time()))
     client = TestClient(create_app(engine, gateway, SECRET))

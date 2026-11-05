@@ -22,11 +22,12 @@ class PayRailClient:
             timeout=10.0,
         )
 
-    def charge(self, *, amount_cents: int, currency: str, reference: str, method: str) -> ChargeResult:
+    def charge(self, *, amount_cents: int, currency: str, reference: str, method: str, idempotency_key: str) -> ChargeResult:
         return self._parse(
             self._request(
                 "POST",
                 "/payments",
+                headers={"Idempotency-Key": idempotency_key},
                 json={
                     "amount": amount_cents,
                     "currency": currency,
