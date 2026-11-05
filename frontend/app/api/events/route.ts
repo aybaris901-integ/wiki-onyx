@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { forward } from "@/lib/backend";
-import { readEvent } from "@/lib/events";
+import { readEvent } from "@/lib/schema";
 import { sampleEvents } from "@/lib/sample-store";
 
 // GET: the latest events, newest first. Sample events when no agent is configured.

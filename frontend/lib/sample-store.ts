@@ -1,4 +1,4 @@
-import type { BrainEvent, Person, PersonStatus } from "./events";
+import type { BrainEvent, Person, PersonStatus } from "./schema";
 import {
   SAMPLE_ROSTER,
   sampleHandoffEvent,

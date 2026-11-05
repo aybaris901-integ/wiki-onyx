@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { forward } from "@/lib/backend";
-import { readPerson } from "@/lib/events";
+import { readPerson } from "@/lib/schema";
 import { sampleRoster } from "@/lib/sample-store";
 
 export async function GET() {

@@ -1,5 +1,5 @@
 import { forward } from "@/lib/backend";
-import { readEvent, readPerson, type PersonStatus } from "@/lib/events";
+import { readEvent, readPerson, type PersonStatus } from "@/lib/schema";
 import { sampleSetStatus } from "@/lib/sample-store";
 
 const STATUSES: PersonStatus[] = ["active", "left", "new"];

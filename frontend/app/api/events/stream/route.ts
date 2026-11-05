@@ -1,5 +1,5 @@
 import { backendUrl } from "@/lib/backend";
-import type { BrainEvent } from "@/lib/events";
+import type { BrainEvent } from "@/lib/schema";
 import { sampleEvents, subscribeSample } from "@/lib/sample-store";
 
 const SSE_HEADERS = {

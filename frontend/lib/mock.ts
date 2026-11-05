@@ -1,5 +1,5 @@
 import type { Answer, Source } from "./answer";
-import type { BrainEvent, Person } from "./events";
+import type { BrainEvent, Person } from "./schema";
 
 // Stand-in data, only used until ASK_BACKEND_URL points at the real agent.
 // The page stamps all of it "Sample". Links open the demo data on GitHub.
