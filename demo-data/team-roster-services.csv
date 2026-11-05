@@ -1,0 +1,6 @@
+name,role,service_owned,joined_date,status
+Tom Becker,Engineering supervisor,,2026-08-03,active
+Maria Lopez,Backend engineer,payments-service;auth;notifications,2023-06-05,active
+Sam Patel,Infrastructure / DevOps,infrastructure,2022-01-10,active
+Priya Shah,Frontend lead,frontend,2022-09-19,active
+Alex Chen,Senior backend engineer,payments-service,2021-03-15,left
