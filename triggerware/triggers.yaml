@@ -1,0 +1,40 @@
+# Company Brain triggers. Each one is a saved Triggerware trigger; the bridge creates them on start
+# (client.triggers.create) and watches them (client.triggers.watch), forwarding every delta to the agent's
+# POST /events. The same definitions drive the local fallback watcher when Triggerware isn't running.
+
+sources:
+  roster:
+    kind: csv
+    path: ../demo-data/team-roster.csv
+    key: handle
+  github:
+    kind: connector            # Triggerware GitHub connector from the tw2 catalog
+    repo: aybaris901-integ/wiki-onyx
+
+triggers:
+  - name: employee_left
+    description: A person in team-roster.csv changed status to "left".
+    sql: SELECT name, handle, role, team, left FROM roster WHERE status = 'left'
+    emit:
+      type: employee_left
+      title: "{name} left Acme"
+      person: "{name}"
+      severity: warn
+
+  - name: new_hire
+    description: A person in team-roster.csv appeared with status "new".
+    sql: SELECT name, handle, role, team, started FROM roster WHERE status = 'new'
+    emit:
+      type: new_hire
+      title: "{name} joined Acme as {role}"
+      person: "{name}"
+      severity: good
+
+  - name: pr_merged
+    description: A pull request on the repo was merged. The agent checks the body for a "why".
+    sql: SELECT number, title, body, author, url, merged_at FROM github.pull_requests WHERE merged = true
+    emit:
+      type: pr_merged
+      title: "PR #{number} merged: {title}"
+      person: "{author}"
+      severity: info
