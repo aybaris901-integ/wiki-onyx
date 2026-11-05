@@ -78,7 +78,7 @@ def event_from_webhook(kind: str, payload: dict) -> list[Event]:
                 sources=[source] if url else [],
                 severity="warn",
             ))
-    else:
+    elif kind not in ("employee_left", "new_hire"):  # roster kinds are emitted by the roster handler
         events.append(Event(
             type=kind if kind in KNOWN_TYPES else "info",
             title=str(payload.get("title") or kind.replace("_", " ").capitalize()),
