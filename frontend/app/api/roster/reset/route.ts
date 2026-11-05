@@ -1,8 +1,6 @@
 import { forward } from "@/lib/backend";
 import { sampleReset } from "@/lib/sample-store";
 
-export const dynamic = "force-dynamic";
-
 export async function POST() {
   try {
     const reply = await forward("/roster/reset", { method: "POST" });

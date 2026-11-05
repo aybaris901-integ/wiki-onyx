@@ -2,8 +2,6 @@ import { forward } from "@/lib/backend";
 import { readEvent, readPerson, type PersonStatus } from "@/lib/events";
 import { sampleSetStatus } from "@/lib/sample-store";
 
-export const dynamic = "force-dynamic";
-
 const STATUSES: PersonStatus[] = ["active", "left", "new"];
 
 export async function POST(request: Request, { params }: { params: Promise<{ handle: string }> }) {

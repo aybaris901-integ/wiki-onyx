@@ -219,9 +219,9 @@ export function useEvents() {
   return { events, connection, sample };
 }
 
-export function relativeTime(iso: string, now = Date.now()): string {
+export function relativeTime(iso: string, now: number): string {
   const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "";
+  if (Number.isNaN(then) || !now) return "";
   const seconds = Math.max(0, Math.round((now - then) / 1000));
   if (seconds < 5) return "just now";
   if (seconds < 60) return `${seconds} s ago`;

@@ -1,11 +1,11 @@
+import { connection } from "next/server";
 import { forward } from "@/lib/backend";
 import { readEvent } from "@/lib/events";
 import { sampleEvents } from "@/lib/sample-store";
 
-export const dynamic = "force-dynamic";
-
 // GET: the latest events, newest first. Sample events when no agent is configured.
 export async function GET() {
+  await connection();
   try {
     const reply = await forward("/events");
     if (!reply) return Response.json({ events: sampleEvents(), sample: true });

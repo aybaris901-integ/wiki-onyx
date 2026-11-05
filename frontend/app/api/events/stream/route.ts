@@ -2,8 +2,6 @@ import { backendUrl } from "@/lib/backend";
 import type { BrainEvent } from "@/lib/events";
 import { sampleEvents, subscribeSample } from "@/lib/sample-store";
 
-export const dynamic = "force-dynamic";
-
 const SSE_HEADERS = {
   "content-type": "text/event-stream; charset=utf-8",
   "cache-control": "no-cache, no-transform",

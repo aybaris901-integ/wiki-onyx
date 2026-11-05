@@ -1,10 +1,10 @@
+import { connection } from "next/server";
 import { forward } from "@/lib/backend";
 import { readPerson } from "@/lib/events";
 import { sampleRoster } from "@/lib/sample-store";
 
-export const dynamic = "force-dynamic";
-
 export async function GET() {
+  await connection();
   try {
     const reply = await forward("/roster");
     if (!reply) return Response.json({ people: sampleRoster(), sample: true });

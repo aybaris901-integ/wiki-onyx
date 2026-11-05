@@ -1,6 +1,6 @@
 # Company Brain frontend
 
-Next.js 16, no sign-in. The landing page is at `/` and the chat is at `/app`.
+Next.js 16, no sign-in. The landing page is at `/`, the chat at `/app`, the demo control room at `/team`.
 
 ## Run it
 
@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Without any settings it runs on stand-in answers, and each one is stamped "Sample answer" on the page.
+Without any settings it runs on stand-in data, and everything on screen is stamped "Sample".
 
 ## Connect the real agent
 
@@ -19,29 +19,32 @@ Put the agent's base address in `.env.local` and restart the dev server:
 ASK_BACKEND_URL=http://localhost:8000
 ```
 
-The browser only talks to this app's `/api/ask`, which forwards to the agent on the server, so the agent doesn't need CORS.
+The browser only talks to this app's `/api/*` routes, which forward to the agent on the server, so the
+agent doesn't need CORS. See `/AGENTS.md` at the repo root for the full agent API.
 
-## What it sends the agent
+| Page route | Agent route | What it is |
+|---|---|---|
+| `POST /api/ask` | `POST /ask` | A question in, an answer with sources out |
+| `GET /api/events/stream` | `GET /events/stream` | Server-Sent Events, one event per `data:` line |
+| `GET /api/events` | `GET /events` | The latest 50 events, newest first (the page polls this if the stream drops) |
+| `POST /api/events` | `POST /events` | A Triggerware-style webhook in |
+| `GET /api/roster` | `GET /roster` | The team roster |
+| `POST /api/roster/[handle]/status` | `POST /roster/{handle}/status` | `{ "status": "left" \| "active" \| "new" }` |
+| `POST /api/roster/reset` | `POST /roster/reset` | Reload the roster, clear events |
 
-`POST {ASK_BACKEND_URL}/ask` with `{ "question": "..." }`
+## What the chat sends and expects
 
-## What it expects back
+`POST /ask` with `{ "question": "..." }`, back:
 
 ```json
 {
-  "answer": "One or two plain sentences.",
-  "sources": [
-    {
-      "type": "pr",
-      "url": "https://github.com/org/repo/pull/482",
-      "author": "Maya Okafor",
-      "date": "2025-11-19"
-    }
-  ]
+  "answer": "One to three plain sentences.",
+  "sources": [{ "type": "pr", "url": "https://github.com/org/repo/pull/482", "author": "Maya Okafor", "date": "2025-11-19" }],
+  "meta": { "retriever": "chroma", "model": "...", "ms": 1234, "live": true }
 }
 ```
 
-`type` picks the card. Use one of:
+`type` picks the card:
 
 | type | Card label | Card color |
 |---|---|---|
@@ -49,20 +52,25 @@ The browser only talks to this app's `/api/ask`, which forwards to the agent on 
 | `pr` | Written in | blue |
 | `commit` | Changed in | blue |
 | `code` | Lives in (a link's last part shows as the file name) | black |
-| `doc` | Written down in | light blue |
+| `doc`, `adr`, `meeting`, `handoff` | Written down in | light blue |
 | `owner` | Owned by (`author` is the owner) | red |
 
-Anything else still shows as a plain source card.
+Optional on any source: `title` and `quote` (the exact line that backs the answer). Empty `sources` tells the
+reader to check with a person. Return 429 when rate limited; the page waits 30 seconds.
 
-Optional on any source, and worth sending:
+## Live events
 
-- `title`: the PR or document title
-- `quote`: the exact line that backs the answer, shown in quotes on the card
+The `/app` page shows a "Live events" rail (a button and bottom sheet on phones). Each event is a card with
+its type, time, person, a severity tone (warn red, good green, info blue), an expandable markdown body and
+compact source cards. Handoff reports and onboarding plans open expanded.
 
-Empty `sources` tells the reader to check with a person before acting on the answer.
+## Team page
 
-Return 429 when rate limited. Any other error status shows "The answer service isn't responding". The page waits 30 seconds for the agent.
+`/team` lists the roster. "Mark as left" (confirm with a second click) posts the status change; the agent then
+emits `employee_left` and, a few seconds later, `handoff_report`. "Onboarding plan" does the same for new hires.
+"Reset demo" puts everything back. In sample mode the same flow runs against an in-memory roster, so the demo
+works with no agent at all.
 
 ## Demo questions
 
-Edit `EXAMPLE_QUESTIONS` in `lib/answer.ts`.
+Edit `EXAMPLE_QUESTIONS` in `lib/answer.ts`. Sample answers live in `lib/mock.ts`.
