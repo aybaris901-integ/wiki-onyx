@@ -121,6 +121,12 @@ const samples: Record<string, Answer> = {
   },
 };
 
+// The last good answer for a demo question, shown with a "Saved" label when the live agent is down.
+export function savedAnswer(question: string): Answer | null {
+  const match = samples[question.trim().toLowerCase()];
+  return match ? { ...match, sample: true, saved: true } : null;
+}
+
 export function sampleAnswer(question: string): Answer {
   const match = samples[question.trim().toLowerCase()];
   return {

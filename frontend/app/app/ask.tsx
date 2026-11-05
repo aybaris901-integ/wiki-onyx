@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
 import { EXAMPLE_QUESTIONS, MAX_QUESTION, type Answer } from "@/lib/answer";
+import { savedAnswer } from "@/lib/mock";
 import { EventsPanel } from "./events-panel";
 import { SourceCard, inStoryOrder } from "./sources";
 
@@ -105,6 +106,11 @@ export function Ask() {
       else change = { state: "failed", problem: SERVICE_DOWN };
     } catch {
       change = { state: "failed", problem: SERVICE_DOWN };
+    }
+    // Live agent down: show the saved answer for a demo question, and say so on screen.
+    if (change.state === "failed" && change.problem !== TOO_MANY) {
+      const saved = savedAnswer(question);
+      if (saved) change = { state: "answered", reply: saved, seconds: (performance.now() - startedAt) / 1000 };
     }
     update(change);
   }
@@ -280,9 +286,10 @@ function Answered({ reply, seconds }: { reply: Answer; seconds: number }) {
         </span>
       </p>
       <p className="ap-timing">
-        {reply.sample ? "Answered" : "Answered live"} in {seconds.toFixed(1)} seconds
+        {reply.saved ? "Saved answer" : reply.sample ? "Answered" : "Answered live"} in {seconds.toFixed(1)} seconds
         {!reply.sample && reply.meta?.retriever && <span className="ap-sample">via {reply.meta.retriever}</span>}
-        {reply.sample && <span className="ap-sample">Sample answer. The real agent isn&apos;t connected yet.</span>}
+        {reply.saved && <span className="ap-sample">Saved, not live. The agent didn&apos;t respond, so this is the last saved answer.</span>}
+        {reply.sample && !reply.saved && <span className="ap-sample">Sample answer. The real agent isn&apos;t connected yet.</span>}
       </p>
       {stops.length > 0 ? (
         <ul className="ap-srcs" aria-label="Sources">

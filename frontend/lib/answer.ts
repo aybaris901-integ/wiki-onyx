@@ -21,6 +21,7 @@ export type Answer = {
   answer: string;
   sources: Source[];
   sample?: boolean;
+  saved?: boolean;
   meta?: AnswerMeta;
 };
 
