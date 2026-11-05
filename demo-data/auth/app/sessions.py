@@ -1,37 +1,27 @@
-"""Server-side sessions, looked up on every dashboard and reporting request."""
+"""Server-side sessions, looked up on every dashboard and reporting request.
+
+Sessions live in Redis rather than Postgres because this lookup runs on almost every page load and was
+the slowest part of request handling. Losing Redis logs people out; it never loses money or
+customer data. Do not copy this choice for anything that has to survive a failover.
+"""
 import secrets
 
-from sqlalchemy import BigInteger, Column, MetaData, String, Table, delete, insert, select
-
 SESSION_TTL_SECONDS = 8 * 60 * 60
-
-metadata = MetaData()
-sessions = Table(
-    "sessions",
-    metadata,
-    Column("id", String, primary_key=True),
-    Column("user_id", String, nullable=False),
-    Column("expires_at", BigInteger, nullable=False),
-)
+KEY_PREFIX = "session:"
 
 
-class PostgresSessionStore:
-    def __init__(self, engine):
-        self._engine = engine
+class RedisSessionStore:
+    def __init__(self, redis_client):
+        self._redis = redis_client
 
-    def create(self, user_id: str, now: int) -> str:
+    def create(self, user_id: str) -> str:
         session_id = secrets.token_urlsafe(24)
-        with self._engine.begin() as conn:
-            conn.execute(insert(sessions).values(id=session_id, user_id=user_id, expires_at=now + SESSION_TTL_SECONDS))
+        self._redis.set(KEY_PREFIX + session_id, user_id, ex=SESSION_TTL_SECONDS)
         return session_id
 
-    def get_user_id(self, session_id: str, now: int) -> str | None:
-        with self._engine.connect() as conn:
-            row = conn.execute(select(sessions).where(sessions.c.id == session_id)).mappings().first()
-        if row is None or row["expires_at"] <= now:
-            return None
-        return row["user_id"]
+    def get_user_id(self, session_id: str) -> str | None:
+        value = self._redis.get(KEY_PREFIX + session_id)
+        return value.decode() if value is not None else None
 
     def delete(self, session_id: str) -> None:
-        with self._engine.begin() as conn:
-            conn.execute(delete(sessions).where(sessions.c.id == session_id))
+        self._redis.delete(KEY_PREFIX + session_id)
