@@ -24,7 +24,7 @@ uv run --with triggerware triggerware/bridge.py
 uv run triggerware/bridge.py
 ```
 
-The bridge posts to the agent at `AGENT_URL` (default `http://localhost:8000`).
+The bridge posts to the agent at `AGENT_URL` (default `http://localhost:8008`).
 
 ## Demo
 

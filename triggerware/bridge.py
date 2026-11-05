@@ -35,7 +35,7 @@ import httpx
 import yaml
 
 HERE = Path(__file__).resolve().parent
-AGENT_URL = os.environ.get("AGENT_URL", "http://localhost:8000").rstrip("/")
+AGENT_URL = os.environ.get("AGENT_URL", "http://localhost:8008").rstrip("/")
 TW_ADDR = os.environ.get("TRIGGERWARE_ADDR", "localhost:5221")
 POLL_SECONDS = float(os.environ.get("BRIDGE_POLL_SECONDS", "2"))
 

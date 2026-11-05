@@ -217,7 +217,7 @@ class Corpus:
             if not line:
                 continue
             parts = line.split()
-            rules.append((parts[0].strip("/"), [p.lstrip("@") for p in parts[1:]]))
+            rules.append((parts[0].lstrip("/"), [p.lstrip("@") for p in parts[1:]]))
         return rules
 
     # ---------- people helpers ----------
@@ -242,7 +242,8 @@ class Corpus:
         rel = re.sub(r"^.*?demo-data/acme/", "", rel).strip("/")
         winner: list[str] = []
         for prefix, handles in self.codeowners:
-            if prefix in ("*", "") or rel == prefix or rel.startswith(prefix.rstrip("/") + "/"):
+            clean = prefix.rstrip("/")
+            if prefix in ("*", "") or rel == clean or rel.startswith(clean + "/"):
                 winner = handles
         people = [self.person(h) for h in winner]
         return [p for p in people if p]

@@ -15,7 +15,7 @@ import sys
 
 import httpx
 
-AGENT_URL = os.environ.get("AGENT_URL", "http://localhost:8000").rstrip("/")
+AGENT_URL = os.environ.get("AGENT_URL", "http://localhost:8008").rstrip("/")
 REPO = "https://github.com/aybaris901-integ/wiki-onyx"
 
 EVENTS = {

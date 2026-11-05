@@ -1,0 +1,8 @@
+name,handle,email,role,team,status,started,left,manager
+Maya Okafor,maya,maya@acme.example,Senior Backend Engineer,Payments,active,2023-04-03,,Jordan Lee
+Tomas Ruiz,tomas,tomas@acme.example,Staff Engineer,Checkout,left,2021-09-01,2026-03-01,Jordan Lee
+Priya Raman,priya,priya@acme.example,Backend Engineer,Checkout,active,2024-01-15,,Jordan Lee
+Dana Whitlock,dana,dana@acme.example,Infra Lead,Platform,active,2022-02-01,,Jordan Lee
+Alex Chen,alex,alex@acme.example,Senior Engineer,Media,active,2022-08-01,,Jordan Lee
+Jordan Lee,jordan,jordan@acme.example,Engineering Manager,Engineering,active,2020-05-01,,
+Sam Patel,sam,sam@acme.example,Backend Engineer,Backend,new,2026-11-02,,Jordan Lee

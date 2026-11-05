@@ -6,13 +6,13 @@ export PATH := $(NODE_BIN):$(PATH)
 setup:
 	cd agent && uv sync
 	cd frontend && npm install
-	@test -f frontend/.env.local || echo 'ASK_BACKEND_URL=http://localhost:8000' > frontend/.env.local
+	@test -f frontend/.env.local || echo 'ASK_BACKEND_URL=http://localhost:8008' > frontend/.env.local
 
 index:
 	cd agent && uv run python -m brain.index
 
 agent:
-	cd agent && uv run uvicorn brain.app:app --port 8000 --reload
+	cd agent && uv run uvicorn brain.app:app --port 8008 --reload
 
 frontend:
 	cd frontend && npm run dev
@@ -23,7 +23,7 @@ bridge:
 # Runs agent + frontend + bridge together; Ctrl-C stops all three.
 dev:
 	@trap 'kill 0' INT TERM; \
-	( cd agent && uv run uvicorn brain.app:app --port 8000 ) & \
+	( cd agent && uv run uvicorn brain.app:app --port 8008 ) & \
 	( cd frontend && npm run dev ) & \
 	( sleep 4 && uv run triggerware/bridge.py ) & \
 	wait

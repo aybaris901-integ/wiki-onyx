@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import logging
 import re
 import threading
@@ -19,6 +20,7 @@ from rank_bm25 import BM25Okapi
 from .config import Settings, settings as default_settings
 from .data import Chunk, Corpus
 
+os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
 log = logging.getLogger("brain.index")
 
 TOKEN = re.compile(r"[a-z0-9]+")
@@ -75,6 +77,13 @@ class SentenceTransformerEmbedder:
                 log.info("loaded %s in %.1fs", self.model_name, time.time() - started)
         return self._model
 
+    @property
+    def ready(self) -> bool:
+        return self._model is not None
+
+    def warm(self) -> None:
+        self._load()
+
     def __call__(self, texts: Sequence[str]) -> list[list[float]]:
         model = self._load()
         return model.encode(list(texts), normalize_embeddings=True, show_progress_bar=False).tolist()
@@ -89,7 +98,8 @@ class HybridIndex:
         self.embedder: Embedder = embedder or SentenceTransformerEmbedder(self.settings.embed_model)
         self.chunks = corpus.chunks
         self.by_id = {c.id: c for c in self.chunks}
-        self.bm25 = BM25Okapi([tokenize(c.text) for c in self.chunks] or [["empty"]])
+        # titles count double so a PR named for the thing beats a doc that only mentions it
+        self.bm25 = BM25Okapi([tokenize(c.title) * 2 + tokenize(c.text) for c in self.chunks] or [["empty"]])
         self.collection = None
         self._vector_ready = threading.Event()
 
@@ -135,6 +145,9 @@ class HybridIndex:
         def run():
             try:
                 self.build_vectors()
+                warm = getattr(self.embedder, "warm", None)
+                if warm:
+                    warm()  # first question must not pay for loading the model
             except Exception as exc:  # the demo keeps working on BM25 alone
                 log.warning("vector index unavailable: %s", exc)
 
@@ -144,7 +157,10 @@ class HybridIndex:
 
     @property
     def vectors_ready(self) -> bool:
-        return self._vector_ready.is_set() and self.collection is not None
+        """Vectors join the search only once the collection exists and the model is loaded, so no request blocks."""
+        if not (self._vector_ready.is_set() and self.collection is not None):
+            return False
+        return getattr(self.embedder, "ready", True)
 
     # ---------- search ----------
 

@@ -6,7 +6,9 @@ import asyncio
 import re
 from collections import deque
 
-from .models import Event, Source
+from .models import Event, EventType, Source
+
+KNOWN_TYPES = set(EventType.__args__)
 
 WHY = re.compile(r"\bbecause\b|\bwhy\b|\bso that\b|\bcontext\b|\bmotivation\b|\brationale\b|^##+\s*why", re.I | re.M)
 
@@ -78,7 +80,7 @@ def event_from_webhook(kind: str, payload: dict) -> list[Event]:
             ))
     else:
         events.append(Event(
-            type=kind if kind in Event.model_fields["type"].annotation.__args__ else "info",
+            type=kind if kind in KNOWN_TYPES else "info",
             title=str(payload.get("title") or kind.replace("_", " ").capitalize()),
             body=str(payload.get("body") or ""),
             person=payload.get("person"),

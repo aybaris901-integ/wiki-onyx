@@ -33,17 +33,40 @@ def clamp_sentences(text: str, limit: int = 3) -> str:
     return " ".join(_sentences(text)[:limit])
 
 
+def _trim(text: str, limit: int = 160) -> str:
+    """Cut at a sentence end, else at a word boundary, never mid-word."""
+    text = text.strip().strip('"“”')
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    for mark in (". ", "; ", ", "):
+        pos = cut.rfind(mark)
+        if pos > limit // 2:
+            return cut[: pos + (1 if mark == ". " else 0)].strip()
+    return cut[: cut.rfind(" ")].strip() + "…"
+
+
+def overlap(query: str, text: str) -> int:
+    return len(set(tokenize(query)) & set(tokenize(text)))
+
+
 def best_line(chunk: Chunk, query: str) -> str | None:
     """The chunk line that shares the most words with the question, so the card shows a relevant quote."""
-    words = set(tokenize(query))
-    best, score = None, 0
-    for line in chunk.lines:
-        overlap = len(words & set(tokenize(line)))
-        if overlap > score or (overlap == score and best and len(line) < len(best) and overlap > 0):
-            best, score = line, overlap
-    if best is None and chunk.lines:
-        best = chunk.lines[0]
-    return best[:160] if best else None
+    candidates = [l for l in chunk.lines if l.strip().lower() != chunk.title.strip().lower() and not l.startswith("http")]
+    best, score = None, -1
+    for line in candidates:
+        value = overlap(query, line)
+        if value > score or (value == score and best and len(line) < len(best)):
+            best, score = line, value
+    return _trim(best) if best else None
+
+
+def rank_for(query: str, chunks: list[Chunk], types: tuple[str, ...]) -> Chunk | None:
+    """Among chunks of the given types, the one whose title (x3) and text overlap the question most."""
+    scored = [(overlap(query, c.title) * 3 + overlap(query, c.text), -i, c) for i, c in enumerate(chunks) if c.type in types]
+    if not scored:
+        return None
+    return max(scored, key=lambda t: (t[0], t[1]))[2]
 
 
 def source_from(chunk: Chunk, quote: str | None = None, kind: str | None = None) -> Source:
@@ -173,17 +196,21 @@ class Answerer:
             sources.append(source_from(chunk, quote))
             return quote
 
-        built = next((c for c in chunks if c.type == "pr"), None) or next((c for c in chunks if c.type in ("adr", "code")), None)
+        who_question = question.strip().lower().startswith("who")
+        if who_question and owner_note:
+            parts.append(owner_note)
+            owner_note = ""
+        built = rank_for(question, chunks, ("pr",)) or rank_for(question, chunks, ("adr", "code"))
         if built:
             quote = take(built)
-            where = f"in {built.title}" if built.type != "code" else f"in {built.title}"
+            verb = "decided this" if built.type == "adr" else "built this"
             when = f" on {built.date}" if built.date else ""
-            parts.append(f"{built.author or 'The team'} built this {where}{when}" + (f": “{quote}”" if quote else "."))
-        talk = next((c for c in chunks if c.type in ("slack", "meeting") and c.doc_id not in used), None)
+            parts.append(f"{built.author or 'The team'} {verb} in “{built.title}”{when}" + (f": “{quote}”" if quote else "."))
+        talk = rank_for(question, [c for c in chunks if c.doc_id not in used], ("slack", "meeting"))
         if talk:
             quote = take(talk)
             place = talk.channel or talk.title
-            parts.append(f"It was discussed in {place}" + (f" on {talk.date}" if talk.date else "") + (f", where {talk.author or 'the team'} said “{quote}”" if quote else "."))
+            parts.append(f"It was discussed in {place}" + (f" on {talk.date}" if talk.date else "") + (f": “{quote}”" if quote else "."))
         if not parts:
             top = chunks[0]
             quote = take(top)

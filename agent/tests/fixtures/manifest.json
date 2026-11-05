@@ -1,0 +1,10 @@
+{
+  "company": "Acme",
+  "repo": "aybaris901-integ/wiki-onyx",
+  "branch": "company-brain",
+  "people": {"Maya Okafor": {"handle": "maya", "role": "Senior Backend Engineer", "team": "Payments", "status": "active"}},
+  "prs": {
+    "retry-queue": {"number": null, "url": null, "title": "Move charges into a retry queue", "author": "Maya Okafor", "date": "2025-11-19", "files": ["demo-data/acme/services/payments/retry_queue.py"]},
+    "self-hosted-images": {"number": 7, "url": null, "title": "Keep the image server self-hosted", "author": "Dana Whitlock", "date": "2024-06-24", "files": ["demo-data/acme/services/images/server.py"]}
+  }
+}

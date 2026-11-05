@@ -10,7 +10,7 @@ Repo on GitHub: https://github.com/aybaris901-integ/wiki-onyx  (branch: company-
 ## Layout
 
 - `frontend/`   Next.js 16 app. Landing at `/`, chat at `/app`. Talks only to its own `/api/*` routes,
-                which proxy to the agent (`ASK_BACKEND_URL`, default http://localhost:8000).
+                which proxy to the agent (`ASK_BACKEND_URL`, default http://localhost:8008).
 - `agent/`      Python 3.14 FastAPI service (uv). RAG over `demo-data/` with Chroma + sentence-transformers,
                 optional Onyx retriever, LLM via OpenRouter or Anthropic, extractive fallback with no key.
 - `demo-data/`  The fake company "Acme" (team name: Acme Shop). Everything the agent indexes.
@@ -92,7 +92,7 @@ Alex's offboarding handoff (docs/handoffs/alex-offboarding.md) must list: owned 
 search indexer, thumbnail cron), open risks, who should take over (Dana for images, Priya for search),
 runbooks, and 3 things nobody else knows.
 
-## Agent HTTP API (FastAPI, port 8000)
+## Agent HTTP API (FastAPI, port 8008)
 
 `POST /ask`  body `{ "question": "..." }` →
 ```
@@ -150,9 +150,9 @@ With no LLM key the agent still answers: extractive mode (top chunks → templat
 
 ```
 # agent
-cd agent && uv sync && uv run python -m brain.index && uv run uvicorn brain.app:app --port 8000
+cd agent && uv sync && uv run python -m brain.index && uv run uvicorn brain.app:app --port 8008
 # frontend
-cd frontend && npm install && echo ASK_BACKEND_URL=http://localhost:8000 > .env.local && npm run dev
+cd frontend && npm install && echo ASK_BACKEND_URL=http://localhost:8008 > .env.local && npm run dev
 ```
 `make dev` at the root runs both.
 
