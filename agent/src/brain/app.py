@@ -142,6 +142,14 @@ def create_app(settings: Settings | None = None, brain: Brain | None = None) -> 
         events = event_from_webhook(body.type, body.payload)
         for event in events:
             brain.events.emit(event)
+        # A roster trigger from the bridge (CSV changed) starts the same work as the /roster endpoint,
+        # unless the agent already applied that status in memory (no duplicate report).
+        if body.type in ("employee_left", "new_hire"):
+            handle = str(body.payload.get("handle") or "")
+            status = "left" if body.type == "employee_left" else "new"
+            person = brain.roster.find(handle) if handle else None
+            if person and person.status != status:
+                await apply_status(brain, person, status)
         return events[0].model_dump() if len(events) == 1 else {"events": [e.model_dump() for e in events]}
 
     @app.delete("/events")
@@ -168,41 +176,7 @@ def create_app(settings: Settings | None = None, brain: Brain | None = None) -> 
         person = brain.roster.find(handle)
         if not person:
             raise HTTPException(status_code=404, detail=f"No one called {handle} on the roster.")
-        person = brain.roster.set_status(person, body.status)
-        emitted: list[Event] = []
-        if body.status == "left":
-            successors = brain.roster.successors(person)
-            emitted.append(brain.events.emit(Event(
-                type="employee_left",
-                title=f"{person.name} left {brain.corpus.manifest.get('company', 'the company')}",
-                body=f"{person.name} ({person.role or 'engineer'}, {person.team or 'engineering'}) is marked as left. "
-                     f"Owned paths: {', '.join(brain.corpus.owned_paths(person)) or 'none in CODEOWNERS'}. "
-                     f"Writing the handoff report now" + (f"; likely successors: {', '.join(successors)}." if successors else "."),
-                person=person.name,
-                sources=[Source(type="owner", url=settings.blob_url("demo-data/team-roster.csv"), author=person.name, date=person.left, title="team-roster.csv")],
-                severity="warn",
-            )))
-
-            async def write_report():
-                brain.events.emit(await brain.roster.handoff_report(person))
-
-            brain.spawn(write_report())
-        elif body.status == "new":
-            emitted.append(brain.events.emit(Event(
-                type="new_hire",
-                title=f"{person.name} joined as {person.role or 'engineer'}",
-                body=f"Welcome {person.name} to {person.team or 'engineering'}. Drafting an onboarding plan.",
-                person=person.name,
-                severity="good",
-            )))
-
-            async def write_plan():
-                brain.events.emit(await brain.roster.onboarding_plan(person))
-
-            brain.spawn(write_plan())
-        else:
-            emitted.append(brain.events.emit(Event(type="info", title=f"{person.name} is active again", person=person.name)))
-        return {"person": person.model_dump(), "events": [e.model_dump() for e in emitted]}
+        return await apply_status(brain, person, body.status)
 
     @app.exception_handler(Exception)
     async def unhandled(request: Request, exc: Exception):
@@ -220,3 +194,40 @@ def main() -> None:
     import uvicorn
 
     uvicorn.run("brain.app:app", host="0.0.0.0", port=default_settings.port, reload=False)
+
+
+async def apply_status(brain, person, status: str) -> dict:
+    """Marks a person left or new, emits the trigger event, and starts the handoff report or onboarding plan."""
+    person = brain.roster.set_status(person, status)
+    emitted: list[Event] = []
+    if status == "left":
+        successors = brain.roster.successors(person)
+        emitted.append(brain.events.emit(Event(
+            type="employee_left",
+            title=f"{person.name} left {brain.corpus.manifest.get('company', 'the company')}",
+            body=f"{person.name} ({person.role or 'engineer'}, {person.team or 'engineering'}) is marked as left. "
+                 f"Owned paths: {', '.join(brain.corpus.owned_paths(person)) or 'none in CODEOWNERS'}. "
+                 f"Writing the handoff report now" + (f"; likely successors: {', '.join(successors)}." if successors else "."),
+            person=person.name,
+            sources=[Source(type="owner", url=default_settings.blob_url("demo-data/team-roster.csv"), author=person.name, date=person.left, title="team-roster.csv")],
+            severity="warn",
+        )))
+
+        async def write_report():
+            brain.events.emit(await brain.roster.handoff_report(person))
+
+        brain.spawn(write_report())
+    elif status == "new":
+        emitted.append(brain.events.emit(Event(
+            type="new_hire",
+            title=f"{person.name} joined as {person.role or 'engineer'}",
+            body=f"Welcome {person.name} to {person.team or 'engineering'}. Drafting an onboarding plan.",
+            person=person.name,
+            severity="good",
+        )))
+
+        async def write_plan():
+            brain.events.emit(await brain.roster.onboarding_plan(person))
+
+        brain.spawn(write_plan())
+    return {"person": person.model_dump(), "events": [e.model_dump() for e in emitted]}
