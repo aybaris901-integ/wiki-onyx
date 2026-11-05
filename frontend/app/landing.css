@@ -1,0 +1,838 @@
+.lp {
+  position: relative;
+  overflow-x: clip;
+}
+
+/* Held back until the intro is ready, so the finished page never flashes first */
+.lp .world,
+.lp .lp-flow {
+  visibility: hidden;
+}
+
+.lp.is-ready .world,
+.lp.is-ready .lp-flow {
+  visibility: visible;
+}
+
+/* The world: fixed behind everything, the content floats over it */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--sky);
+}
+
+.w-sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.w-gold,
+.w-dusk {
+  opacity: 0;
+}
+
+.w-far {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.w-cloud {
+  position: absolute;
+  height: auto;
+  max-width: none;
+}
+
+.w-cloud-a {
+  top: 6%;
+  left: -8%;
+  width: min(44vw, 720px);
+  animation: drift-a 70s ease-in-out infinite alternate;
+}
+
+.w-cloud-c {
+  top: 57%;
+  left: 19%;
+  width: min(25vw, 460px);
+  opacity: 0.95;
+  animation: drift-a 90s ease-in-out infinite alternate;
+}
+
+/* The brain floats right above the company */
+.w-brain {
+  position: absolute;
+  z-index: 1;
+  top: 9vh;
+  right: 3vw;
+  width: min(50vw, 88vh);
+  will-change: transform;
+  transform-origin: 70% 30%;
+}
+
+.w-brain-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: bob 9s ease-in-out infinite alternate;
+}
+
+.w-ground {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  will-change: transform;
+}
+
+.w-hq-in {
+  position: absolute;
+  inset: 0;
+}
+
+/* Forest to scale with the campus, running the full width of the page */
+.w-trees {
+  position: absolute;
+  right: 0;
+  bottom: -2.5vh;
+  left: 0;
+  height: 18vh;
+  background:
+    url("/world/trees.webp") repeat-x 0 100% / auto 100%,
+    url("/world/trees.webp") repeat-x 41% 100% / auto 74%;
+}
+
+.w-hq-wrap {
+  position: absolute;
+  right: -3vw;
+  bottom: -1.5vh;
+  width: min(64vw, 112vh);
+}
+
+.w-hq {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.w-hq-dusk {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  opacity: 0;
+}
+
+/* Top line */
+.lp-top {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px var(--gutter);
+  pointer-events: none;
+}
+
+.lp-mark {
+  display: inline-flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 20px;
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 750;
+  font-stretch: 112%;
+  letter-spacing: -0.025em;
+  background: var(--cloud);
+  border-radius: 999px;
+}
+
+.lp-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 24px;
+  color: var(--cloud);
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  white-space: nowrap;
+  background: var(--ink);
+  border-radius: 999px;
+  pointer-events: auto;
+  transition: transform 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+
+.lp-pill:hover {
+  background: var(--coral);
+  transform: scale(1.05);
+}
+
+.lp-pill:active {
+  transform: scale(0.97);
+}
+
+.lp-pill:focus-visible {
+  outline: 3px solid var(--cloud);
+  outline-offset: 3px;
+}
+
+.lp-pill-big {
+  height: clamp(58px, 7.4vh, 72px);
+  padding: 0 clamp(30px, 3vw, 46px);
+  font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+}
+
+.lp-flow {
+  position: relative;
+  z-index: 4;
+}
+
+/* Hero */
+.s-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 100dvh;
+  padding: clamp(84px, 13vh, 128px) var(--gutter) 40px;
+}
+
+.h-title {
+  margin: 0;
+  font-size: clamp(2.7rem, min(10.8vw, 21vh), 14.5rem);
+  font-weight: 800;
+  font-stretch: 125%;
+  line-height: 0.96;
+  letter-spacing: -0.058em;
+}
+
+.h-line,
+.gone-line,
+.end-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.h-line > span,
+.gone-line > span,
+.end-line > span {
+  display: block;
+}
+
+.h-sub {
+  max-width: 28em;
+  margin: clamp(18px, 2.8vh, 28px) 0 clamp(20px, 3vh, 30px);
+  font-size: clamp(1.15rem, 1.8vw, 1.65rem);
+  font-weight: 550;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+}
+
+/* The conversation */
+.s-chat {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.bubbles {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(12px, 2vh, 20px);
+  height: 100%;
+  padding: 60px var(--gutter) 30px;
+}
+
+.bubble {
+  max-width: min(780px, 88%);
+  margin: 0;
+  padding: clamp(16px, 2.4vh, 26px) clamp(22px, 2.6vw, 38px);
+  font-size: clamp(1.45rem, 3.5vw, 3.2rem);
+  font-weight: 700;
+  font-stretch: 108%;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  border-radius: 34px;
+}
+
+.bubble[data-from="new"] {
+  align-self: flex-end;
+  color: var(--cloud);
+  background: var(--cobalt);
+  border-bottom-right-radius: 8px;
+}
+
+.bubble[data-from="boss"] {
+  align-self: flex-start;
+  background: var(--cloud);
+  border-bottom-left-radius: 8px;
+}
+
+.gone {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 70px var(--gutter) 28px;
+}
+
+.gone-photo {
+  width: 100%;
+  max-width: 1320px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 34px;
+}
+
+.gone-title {
+  position: absolute;
+  bottom: clamp(44px, 8vh, 84px);
+  left: max(calc(var(--gutter) * 2), calc((100% - 1320px) / 2 + 40px));
+  margin: 0;
+  color: var(--cloud);
+  font-size: clamp(2.5rem, 7.4vw, 7.8rem);
+  font-weight: 800;
+  font-stretch: 120%;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  text-shadow: 0 2px 44px rgb(0 0 0 / 0.55);
+}
+
+/* The product, shown big */
+.s-answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  padding: 74px var(--gutter) 22px;
+  overflow: hidden;
+}
+
+.demo {
+  width: min(1180px, 100%);
+  padding: clamp(16px, 2.4vw, 34px);
+  background: var(--cloud);
+  border-radius: 38px;
+  box-shadow: 0 30px 80px -24px rgb(6 40 80 / 0.55);
+}
+
+.demo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 62px;
+  padding: 6px 6px 6px 24px;
+  background: #eef3f8;
+  border-radius: 999px;
+}
+
+.demo-typed {
+  min-width: 0;
+  font-size: clamp(1rem, 1.5vw, 1.32rem);
+  font-weight: 550;
+  letter-spacing: -0.015em;
+}
+
+.demo-go {
+  flex: none;
+  padding: 13px 28px;
+  color: var(--cloud);
+  font-size: 1.02rem;
+  font-weight: 650;
+  background: var(--ink);
+  border-radius: 999px;
+}
+
+.demo-answer {
+  max-width: 27em;
+  margin: clamp(16px, 3vh, 30px) 0 0;
+  font-size: clamp(1.4rem, 3.1vw, 3.1rem);
+  font-weight: 650;
+  line-height: 1.07;
+  letter-spacing: -0.04em;
+}
+
+.demo-answer span {
+  display: inline-block;
+  white-space: pre;
+}
+
+.demo-time-wrap {
+  margin: clamp(10px, 1.6vh, 16px) 0 clamp(14px, 2.4vh, 24px);
+  color: #d92d16;
+  font-size: clamp(0.98rem, 1.25vw, 1.15rem);
+  font-weight: 650;
+}
+
+.srcs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 1vw, 14px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.src {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: clamp(128px, 19vh, 182px);
+  padding: clamp(14px, 1.5vw, 22px);
+  border-radius: 24px;
+}
+
+.src-kind {
+  font-size: clamp(0.88rem, 1vw, 1rem);
+  font-weight: 550;
+  opacity: 0.86;
+}
+
+.src-title {
+  margin: 4px 0 auto;
+  padding-bottom: 10px;
+  font-size: clamp(1.08rem, 1.7vw, 1.65rem);
+  font-weight: 750;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.src-who,
+.src-when {
+  font-size: clamp(0.86rem, 0.98vw, 0.98rem);
+  font-weight: 500;
+  line-height: 1.26;
+}
+
+.tone-cobalt {
+  color: var(--cloud);
+  background: var(--cobalt);
+}
+
+.tone-coral {
+  color: var(--ink);
+  background: var(--coral);
+}
+
+.tone-leaf {
+  color: var(--ink);
+  background: var(--leaf);
+}
+
+.tone-ink {
+  color: var(--cloud);
+  background: var(--ink);
+}
+
+/* What, then why */
+.s-why {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.why-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.word {
+  position: absolute;
+  margin: 0;
+  font-size: min(36vw, 62vh);
+  font-weight: 800;
+  font-stretch: 125%;
+  line-height: 0.82;
+  letter-spacing: -0.07em;
+}
+
+.word-what {
+  color: var(--ink);
+}
+
+.word-why {
+  color: var(--cloud);
+}
+
+.strike {
+  position: absolute;
+  top: 54%;
+  right: -2%;
+  left: -2%;
+  height: 0.09em;
+  background: var(--coral);
+  border-radius: 99px;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.note {
+  position: absolute;
+  bottom: clamp(30px, 8vh, 82px);
+  left: var(--gutter);
+  margin: 0;
+  font-size: clamp(1.25rem, 2.5vw, 2.3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.why-note {
+  color: var(--cloud);
+}
+
+/* Four questions */
+.s-four {
+  display: flex;
+  align-items: center;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.four-track {
+  display: flex;
+  gap: clamp(16px, 2vw, 30px);
+  width: max-content;
+  padding-inline: var(--gutter);
+  will-change: transform;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: min(72vw, 1040px);
+  height: min(74vh, 720px);
+  padding: clamp(26px, 3.6vw, 56px);
+  border-radius: 44px;
+}
+
+.panel:nth-child(even) {
+  margin-top: 4vh;
+}
+
+.panel:nth-child(odd) {
+  margin-top: -4vh;
+}
+
+.panel-big {
+  margin: 0;
+  font-size: clamp(3rem, 8vw, 8.4rem);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 0.94;
+  letter-spacing: -0.058em;
+}
+
+.panel-low {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  gap: clamp(18px, 3vw, 44px);
+  align-items: end;
+}
+
+.panel-line {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.7vw, 1.6rem);
+  font-weight: 550;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* A real example inside each panel */
+.proof {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: clamp(18px, 2vw, 28px);
+  color: var(--ink);
+  background: var(--cloud);
+  border-radius: 26px;
+  transform: rotate(-1.2deg);
+}
+
+.panel:nth-child(even) .proof {
+  transform: rotate(1.2deg);
+}
+
+.proof-logo {
+  width: 26px;
+  height: 26px;
+}
+
+.proof-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+}
+
+.proof-title {
+  font-size: clamp(1.25rem, 1.9vw, 1.8rem);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.proof-owner {
+  font-size: clamp(1.8rem, 3.2vw, 3.1rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.proof-meta {
+  font-size: clamp(0.95rem, 1.1vw, 1.08rem);
+  font-weight: 500;
+  line-height: 1.28;
+}
+
+.proof-quote p {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.9vw, 1.8rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.proof-msg {
+  margin: 0;
+  font-size: clamp(0.98rem, 1.2vw, 1.15rem);
+  font-weight: 500;
+  line-height: 1.28;
+}
+
+.proof-msg b {
+  display: block;
+  font-weight: 750;
+}
+
+/* The close */
+.s-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 100dvh;
+  padding: clamp(90px, 15vh, 150px) var(--gutter) 24px;
+  color: var(--cloud);
+}
+
+.end-title {
+  margin: 0 0 clamp(20px, 3.4vh, 36px);
+  font-size: clamp(2.9rem, min(9.6vw, 21vh), 13rem);
+  font-weight: 800;
+  font-stretch: 125%;
+  line-height: 0.96;
+  letter-spacing: -0.058em;
+}
+
+.s-end .lp-pill {
+  color: var(--ink);
+  background: var(--cloud);
+}
+
+.s-end .lp-pill:hover {
+  color: var(--cloud);
+  background: var(--coral);
+}
+
+.lp-fine {
+  margin: auto 0 0;
+  padding: 5px 12px;
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 550;
+  line-height: 1.3;
+  background: var(--cloud);
+  border-radius: 14px;
+}
+
+@keyframes drift-a {
+  to {
+    transform: translateX(16vw);
+  }
+}
+
+@keyframes drift-b {
+  to {
+    transform: translateX(-18vw);
+  }
+}
+
+@keyframes bob {
+  from {
+    transform: translateY(-1.6%) rotate(-0.5deg);
+  }
+  to {
+    transform: translateY(2%) rotate(0.8deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .h-title {
+    font-size: 12.2vw;
+    font-stretch: 100%;
+  }
+
+  .w-brain {
+    top: 46vh;
+    right: -6vw;
+    width: 86vw;
+  }
+
+  .w-hq-wrap {
+    right: -26vw;
+    width: 150vw;
+    bottom: -1vh;
+  }
+
+  .w-trees {
+    height: 13vh;
+  }
+
+  .w-cloud-a {
+    width: 90vw;
+  }
+
+  .w-cloud-c {
+    top: 46%;
+    left: -8%;
+    width: 60vw;
+  }
+
+  .bubble {
+    max-width: 94%;
+    border-radius: 24px;
+  }
+
+  .gone-photo {
+    border-radius: 24px;
+  }
+
+  .demo {
+    border-radius: 26px;
+  }
+
+  .srcs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .src {
+    min-height: 112px;
+    border-radius: 18px;
+  }
+
+  .src-when {
+    display: none;
+  }
+
+  .word {
+    font-size: 40vw;
+    font-stretch: 112%;
+  }
+
+  .note {
+    right: var(--gutter);
+  }
+
+  .s-four {
+    height: auto;
+    overflow: visible;
+    padding: 40px var(--gutter);
+  }
+
+  .four-track {
+    flex-direction: column;
+    width: 100%;
+    padding: 0;
+  }
+
+  .panel,
+  .panel:nth-child(even),
+  .panel:nth-child(odd) {
+    width: 100%;
+    height: auto;
+    min-height: 62vh;
+    margin: 0;
+    border-radius: 28px;
+  }
+
+  .panel-big {
+    font-size: 15vw;
+    font-stretch: 100%;
+  }
+
+  .panel-low {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 28px;
+  }
+
+  .end-title {
+    font-size: 14vw;
+    font-stretch: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .w-cloud,
+  .w-brain-img {
+    animation: none;
+  }
+
+  .s-chat,
+  .s-answer,
+  .s-why,
+  .s-four {
+    height: auto;
+    overflow: visible;
+  }
+
+  .gone {
+    position: relative;
+    height: 80vh;
+  }
+
+  .why-stage {
+    flex-direction: column;
+    gap: 16px;
+    height: auto;
+    padding: 80px var(--gutter);
+  }
+
+  .word,
+  .note {
+    position: static;
+  }
+
+  .strike {
+    transform: scaleX(1);
+  }
+
+  .four-track {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .panel,
+  .panel:nth-child(even),
+  .panel:nth-child(odd) {
+    width: 100%;
+    margin: 0;
+  }
+}
