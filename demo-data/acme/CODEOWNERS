@@ -1,0 +1,9 @@
+# Acme Shop code ownership. Updated 2026-03-02 after Tomas Ruiz left (see docs/adr/0004-checkout-ownership.md).
+# Ownership means: you review the PRs, you get paged, you decide.
+
+/services/payments/   @priya
+/services/checkout/   @priya
+/services/images/     @alex
+/services/search/     @alex
+/config/              @jordan
+/infra/               @dana
